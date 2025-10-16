@@ -9,12 +9,9 @@ setwd("D:/data/04 RNA-seq expression/new")
 us_count<-read.csv("read.csv",head=T,row.names=1) 
 us_count[is.na(us_count)] <- 0 
 us_count<-round(us_count,digits=0) 
-
 us_count<-as.matrix(us_count) 
 condition<-factor(c("STEM","STEM","STEM","LEAF","LEAF","LEAF","CAMBIA","CAMBIA","CAMBIA","FLO","FLO","FLO","DRUPE","DRUPE","DRUPE"))
 coldata<-data.frame(row.names=colnames(us_count),condition)  
-coldata 
-condition 
 library(DESeq2) 
 dds<-DESeqDataSetFromMatrix(us_count,coldata,design=~condition)
 head(dds)
@@ -30,11 +27,7 @@ resdata <-merge(as.data.frame(res),as.data.frame(counts(dds,normalize=TRUE)),by=
 deseq_res<-data.frame(resdata)
 up_diff_result<-subset(deseq_res,padj < 0.05 & (log2FoldChange > 1)) 
 down_diff_result<-subset(deseq_res,padj < 0.05 & (log2FoldChange < -1)) 
-write.csv(up_diff_result,"UPgene.csv") 
-write.csv(down_diff_result,"DOWNgene.csv") 
 write.csv(resdata, file="differ_1.csv")
-
-#pheatmap绘制热图
 library("pheatmap")
 data <- read.csv("differ_1.csv", header = TRUE, row.names = 1)
 data_matrix <- data[, c("Pzhe661", "Pzhe665", "Pzhe655R","Pzhe667", "Pzhe669", "Pzhe663", "Pzhe670", 
@@ -82,16 +75,9 @@ plot(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
      xlab="Soft Threshold (power)", ylab="Scale Free Topology Model Fit,signed R^2", type="n")
 text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
      labels=powers, col="red")
-abline(h=0.90, col="red") # 建议R^2达到0.9以上
-
-if (storage.mode(datExpr) == "integer") {
-  print("存储模式是整数，正在转换为双精度...")
-  storage.mode(datExpr) <- "double"
-}
-print(paste("转换后 datExpr 的存储模式:", storage.mode(datExpr)))
-
+abline(h=0.90, col="red") 
 net <- blockwiseModules(datExpr,
-                        power = 6, # 请确保这是您根据软阈值分析选择的合适值
+                        power = 6, 
                         TOMType = "unsigned",
                         minModuleSize = 30,
                         reassignThreshold = 0,
@@ -111,9 +97,9 @@ plotDendroAndColors(net$dendrograms[[1]], moduleColors[net$blockGenes[[1]]],
 pathway_genes_in_datExpr <- colnames(datExpr)[colnames(datExpr) %in% rownames(pathway_expr)]
 pathway_expression <- rowMeans(datExpr[, pathway_genes_in_datExpr, drop = FALSE])
 traitData <- data.frame(PathwayExpression = pathway_expression)
-rownames(traitData) <- rownames(datExpr) # 行名是样本名
+rownames(traitData) <- rownames(datExpr)
 MEs0 <- moduleEigengenes(datExpr, moduleColors)$eigengenes
-MEs <- orderMEs(MEs0) # 重新排序，让相关性更高的模块靠在一起
+MEs <- orderMEs(MEs0) 
 moduleTraitCor <- cor(MEs, traitData, use = "p")
 moduleTraitPvalue <- corPvalueStudent(moduleTraitCor, nrow(datExpr))
 
@@ -134,7 +120,7 @@ labeledHeatmap(Matrix = moduleTraitCor,
                zlim = c(-1,1),
                main = "Module-Pathway Relationships")
 module <- "turquoise"
-moduleGenes <- (moduleColors == module) # 找到属于该模块的所有基因
+moduleGenes <- (moduleColors == module) 
 cat("Number of genes in turquoise module:", sum(moduleGenes), "\n")
 cat("Length of moduleMembership:", length(moduleMembership), "\n")
 cat("Length of GeneSignificance:", length(GeneSignificance), "\n")
