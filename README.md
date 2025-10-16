@@ -157,17 +157,17 @@ cat("Turquoise 模块中的基因数量:", length(turquoise_genes), "\n")
 print(turquoise_genes)
 
 ## Z-score
-library(readxl)    # 用于读取Excel文件
-library(pheatmap)  # 用于绘制热图
-library(RColorBrewer) # 提供颜色配置
+library(readxl) 
+library(pheatmap) 
+library(RColorBrewer) 
 
 data <- read_excel("MYB_lingin_count.xlsx")
 data_df <- as.data.frame(data)
 rownames(data_df) <- data_df[,1]
-data_df <- data_df[,-1] # 移除第一列（已经是行名）
+data_df <- data_df[,-1]
 data_matrix <- as.matrix(data_df)
-data_log <- log2(data_matrix + 1) # 对数变换
-data_zscore <- t(scale(t(data_log))) # 按行进行Z-score标准化
+data_log <- log2(data_matrix + 1)
+data_zscore <- t(scale(t(data_log)))
 
 pheatmap(data_zscore,
          color = colorRampPalette(rev(brewer.pal(n = 11, name = "RdBu")))(100),
@@ -179,8 +179,7 @@ pheatmap(data_zscore,
          border_color = NA,
          main = "Gene Expression Heatmap (Z-score)")
 zscore_df <- as.data.frame(data_zscore)
-zscore_df$Gene <- rownames(zscore_df)  # 添加基因名列
-
+zscore_df$Gene <- rownames(zscore_df) 
 zscore_df <- zscore_df[, c(ncol(zscore_df), 1:(ncol(zscore_df)-1))]
 write.csv(zscore_df, "MYB_lingin_zscore_data.csv", row.names = FALSE)
 
